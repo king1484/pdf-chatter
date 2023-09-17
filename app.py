@@ -1,5 +1,4 @@
 import streamlit as st
-from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.embeddings import OpenAIEmbeddings
@@ -28,8 +27,6 @@ def getAnswer(question):
     else:
         st.warning("Please click the 'Process' button to initialize the conversation.")
 
-
-load_dotenv()
 st.set_page_config(page_title="PDF Chatter", page_icon=":books:")
 st.write(
     """
@@ -91,13 +88,13 @@ def getTextChunks(text):
 
 
 def getVectorStore(chunks):
-    embeddings = OpenAIEmbeddings()
+    embeddings = OpenAIEmbeddings(openai_api_key=st.secrets["api-key"])
     vectorStore = FAISS.from_texts(chunks, embeddings)
     return vectorStore
 
 
 def getConversationChain(vectorStore):
-    llm = ChatOpenAI()
+    llm = ChatOpenAI(openai_api_key=st.secrets["api-key"])
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
     conversationChain = ConversationalRetrievalChain.from_llm(
         llm=llm, retriever=vectorStore.as_retriever(), memory=memory
